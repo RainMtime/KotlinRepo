@@ -1,5 +1,7 @@
 package rainmtime.com.kotlinrepo.movie.ui
 
+import android.arch.lifecycle.MediatorLiveData
+import android.arch.lifecycle.Observer
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v4.widget.SwipeRefreshLayout
@@ -24,6 +26,8 @@ import retrofit2.Response
  * Email: 746431278@qq.com
  */
 class MovieFragment : Fragment() {
+
+    private var liveData: MediatorLiveData<MoviesRsp>? = null
 
     companion object {
         private val TAG = "MovieFragment"
@@ -64,6 +68,20 @@ class MovieFragment : Fragment() {
         recyclerView!!.layoutManager = linearLayoutManager
         mAdapter = MovieRecyclerViewAdapter(context!!)
         recyclerView!!.adapter = mAdapter
+        createAndBindLiveData()
+    }
+
+    private fun createAndBindLiveData() {
+        liveData = MediatorLiveData<MoviesRsp>()
+        liveData!!.value = null
+
+
+        liveData!!.observe(this, Observer<MoviesRsp> { moviesRsp: MoviesRsp? ->
+            if (!CommonUtils.isCollectionEmpty(moviesRsp?.subjects)) {
+                mAdapter?.setData(moviesRsp?.subjects)
+                Log.i(TAG, "movieRSp:$moviesRsp")
+            }
+        })
     }
 
 
@@ -81,9 +99,8 @@ class MovieFragment : Fragment() {
                 Log.i(TAG, "onResponse:" + resultCode
                         + "\n" + moviesRsp?.title)
 
-                if (!CommonUtils.isCollectionEmpty(moviesRsp?.subjects)) {
-                    mAdapter!!.setData(moviesRsp!!.subjects)
-                }
+                liveData!!.postValue(moviesRsp)
+//                mAdapter!!.setData(moviesRsp?.subjects)
             }
         })
     }

@@ -14,4 +14,9 @@ object DouBanNetService {
             .addConverterFactory(GsonConverterFactory.create())
             .build().create(MovieNetApi::class.java)
 
+
+    fun requestMovieData(){
+
+    }
+
 }
