@@ -2,6 +2,7 @@ package rainmtime.com.kotlinrepo.movie.ui
 
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.util.Log
@@ -30,7 +31,9 @@ class MovieFragment : Fragment() {
 
     private var mAdapter: MovieRecyclerViewAdapter? = null
 
-    private var recyclerView:RecyclerView? = null
+    private var recyclerView: RecyclerView? = null
+
+    private var swipeRefreshLayout: SwipeRefreshLayout? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,12 +42,21 @@ class MovieFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
 
         val rootView: View = inflater.inflate(R.layout.fragment_movie, container, false)
-
-        recyclerView = rootView.findViewById(R.id.recyclerView)
+        initView(rootView)
         initViewAndAdapter()
-        ThreadUtils.postDelay(Runnable { requestData() }, 2000L)
+        ThreadUtils.post(Runnable { requestData() })
         return rootView
 
+    }
+
+    private fun initView(rootView: View) {
+        recyclerView = rootView.findViewById(R.id.recyclerView)
+        swipeRefreshLayout = rootView.findViewById(R.id.swipeRefreshLayout)
+
+        swipeRefreshLayout!!.setOnRefreshListener {
+            requestData()
+            swipeRefreshLayout!!.isRefreshing = false
+        }
     }
 
     private fun initViewAndAdapter() {
@@ -56,7 +68,7 @@ class MovieFragment : Fragment() {
 
 
     private fun requestData() {
-        val call = DouBanNetService.movieNetApi!!.getTop250(0, 10)
+        val call = DouBanNetService.movieNetApi!!.getTop250(0, 249)
         call.enqueue(object : Callback<MoviesRsp> {
             override fun onFailure(call: Call<MoviesRsp>?, t: Throwable?) {
                 Log.e(TAG, t?.message)
@@ -70,7 +82,7 @@ class MovieFragment : Fragment() {
                         + "\n" + moviesRsp?.title)
 
                 if (!CommonUtils.isCollectionEmpty(moviesRsp?.subjects)) {
-                   mAdapter!!.setData(moviesRsp!!.subjects)
+                    mAdapter!!.setData(moviesRsp!!.subjects)
                 }
             }
         })
