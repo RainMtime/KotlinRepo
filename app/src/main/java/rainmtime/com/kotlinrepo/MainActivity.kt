@@ -3,6 +3,7 @@ package rainmtime.com.kotlinrepo
 import android.os.Bundle
 import android.support.design.widget.NavigationView
 import android.support.design.widget.Snackbar
+import android.support.v4.app.Fragment
 import android.support.v4.view.GravityCompat
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
@@ -12,9 +13,13 @@ import android.view.View
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
-import kotlinx.android.synthetic.main.content_main.*
+import rainmtime.com.kotlinrepo.movie.adapter.MainViewPagerAdapter
+import rainmtime.com.kotlinrepo.movie.ui.MovieFragment
+import rainmtime.com.kotlinrepo.utils.ResUtils
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener, View.OnClickListener {
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,8 +37,26 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         toggle.syncState()
 
         nav_view.setNavigationItemSelectedListener(this)
-        movie.setOnClickListener(this)
+
+        initPagerAdapterAndTabs()
     }
+
+
+
+    fun initPagerAdapterAndTabs(){
+        val fragments = ArrayList<Fragment>()
+        fragments.add(MovieFragment())
+
+        val fragmentTitles = ArrayList<String>()
+        fragmentTitles.add(ResUtils.getString(R.string.tab_one_title))
+
+        val adapter = MainViewPagerAdapter(fragments,fragmentTitles,supportFragmentManager)
+
+        viewPager.adapter = adapter
+        tabs.setupWithViewPager(viewPager)
+
+    }
+
 
     override fun onBackPressed() {
         if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
